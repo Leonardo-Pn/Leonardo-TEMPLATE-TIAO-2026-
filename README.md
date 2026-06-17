@@ -1,1 +1,0 @@
-# Leonardo-TEMPLATE-TIAO-2026-
