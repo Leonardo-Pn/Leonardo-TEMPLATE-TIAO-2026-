@@ -1,0 +1,9 @@
+# Deploy da API como Lambda
+cd backend
+zip -r function.zip .
+aws lambda update-function-code --function-name spaceguard-processor --zip-file fileb://function.zip
+
+# Deploy do Frontend no S3
+cd frontend
+npm run build
+aws s3 sync build/ s3://spaceguard-frontend/

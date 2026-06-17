@@ -1,0 +1,94 @@
+
+---
+
+### **2. docker-compose.yml (Completo)**
+
+```yaml
+version: '3.8'
+
+services:
+  # API Backend FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spaceguard-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - S3_BUCKET=${S3_BUCKET:-spaceguard-images}
+      - DYNAMODB_TABLE=${DYNAMODB_TABLE:-SpaceGuardAlerts}
+      - MODEL_PATH=/app/models/yolo11n.pt
+    volumes:
+      - ./backend:/app
+      - ./models:/app/models
+    networks:
+      - spaceguard-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: spaceguard-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - spaceguard-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Nginx para servir o frontend em produção
+  nginx:
+    image: nginx:alpine
+    container_name: spaceguard-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/build:/usr/share/nginx/html:ro
+    networks:
+      - spaceguard-network
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+  # LocalStack para simular AWS localmente
+  localstack:
+    image: localstack/localstack:latest
+    container_name: spaceguard-localstack
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+    environment:
+      - SERVICES=s3,dynamodb,sns,lambda
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - ./localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - spaceguard-network
+
+networks:
+  spaceguard-network:
+    driver: bridge
+
+volumes:
+  localstack-data:
+    driver: local

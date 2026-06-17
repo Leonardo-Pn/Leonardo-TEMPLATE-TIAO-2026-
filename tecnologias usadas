@@ -1,0 +1,13 @@
+
+## 🚀 Tecnologias Utilizadas
+
+| Camada | Tecnologias |
+|--------|-------------|
+| **Frontend** | React 18, Chart.js, Leaflet (mapas), Axios |
+| **Backend** | FastAPI, Uvicorn, Pydantic |
+| **ML/IA** | YOLOv8 (Ultralytics), PyTorch, OpenCV |
+| **Cloud** | AWS Lambda, S3, DynamoDB, SNS, API Gateway |
+| **Infra** | Docker, Docker Compose, Nginx |
+| **Dados** | Pandas, NumPy, Scikit-learn |
+
+## 📂 Estrutura do Projeto
